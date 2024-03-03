@@ -1,0 +1,33 @@
+{
+    "manifest_version": 3,
+    "name": "Chess.com db creator",
+    "version": "0.0.1",
+    "description": "When game in chess.com is over, this extension automaticly save the game in database.",
+    "permissions": [
+      "tabs",
+      "storage"
+    ],
+    "action": {
+      "default_popup": "popup/popup.html",
+      "default_icon": {
+        "16": "assets/chess-icon.png",
+        "48": "assets/chess-icon.png",
+        "128": "assets/chess-icon.png"
+      }
+    },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://*.chess.com/*"],
+        "js": ["content.js"]
+      }
+    ],
+    "icons": {
+      "16": "assets/chess-icon.png",
+      "48": "assets/chess-icon.png",
+      "128": "assets/chess-icon.png"
+    }
+  }
+  
