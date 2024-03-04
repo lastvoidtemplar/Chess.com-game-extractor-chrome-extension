@@ -1,23 +1,48 @@
-function handleAppearance(mutationsList, observer) {
-  mutationsList.forEach((mutation) => {
-    if (mutation.addedNodes) {
-      mutation.addedNodes.forEach((node) => {
-        if (
-          node.classList !== undefined &&
-          node.classList.contains("board-modal-container-container")
-          && !isHidden(node)
-        ) {
-          console.log("Detected");
-          // GameOverHadler();
-          observer.disconnect();
-        }
-      });
+function detectVisibilityChange(el, callback, interval = 100) {
+  let isVisible = !isHidden(el);
+
+  const checkVisibility = () => {
+    const currentVisibility = !isHidden(el);
+    if (isVisible !== currentVisibility) {
+      isVisible = currentVisibility;
+      if (isVisible) {
+        callback();
+      }
     }
+  };
+
+  const intervalId = setInterval(checkVisibility, interval);
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (!document.contains(el)) {
+        clearInterval(intervalId);
+        observer.disconnect();
+      }
+    });
+  });
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
   });
 }
 function isHidden(el) {
-  return (el.offsetParent === null)
+  return el.offsetParent === null;
 }
+setTimeout(() => {
+  const endgameBoard = document.getElementsByClassName(
+    "board-modal-container-container"
+  )[0];
+  if (endgameBoard) {
+    detectVisibilityChange(
+      document.getElementsByClassName("board-modal-container-container")[0],
+      () => {
+        GameOverHadler();
+      }
+    );
+  }
+}, 3000);
+
 function GameOverHadler() {
   const moves = parseMoveList(
     document.querySelector("wc-vertical-move-list").children
@@ -47,14 +72,6 @@ function GameOverHadler() {
   };
   chrome.runtime.sendMessage({ type: "game_over", content: payload });
 }
-
-const observer = new MutationObserver(handleAppearance);
-observer.observe(document.body, {
-  childList: true,
-  subtree: true,
-  attributes:true,
-  characterData: true
-})
 
 /**
  * @param {HTMLCollection} gameMovesListChildren
